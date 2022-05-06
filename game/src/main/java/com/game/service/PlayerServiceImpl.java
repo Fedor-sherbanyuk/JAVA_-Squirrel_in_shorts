@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,42 +33,45 @@ public class PlayerServiceImpl implements PlayerService {
                                       Integer maxExperience, Integer minLevel, Integer maxLevel,
                                       PlayerOrder order, Integer pageNumber, Integer pageSize) {
         Specification<Player> specification = (root, query, criteriaBuilder) -> {
-            Predicate predicate = null;
+            List<Predicate> predicateList = new ArrayList<>();
+
             if (name != null) {
-                predicate = criteriaBuilder.like(root.get("name"), criteriaBuilder.literal("%" + name + "%"));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.like(root.get("name"), criteriaBuilder.literal("%" + name + "%"))));
             }
             if (title != null) {
-                predicate = criteriaBuilder.like(root.get("title"), criteriaBuilder.literal("%" + title + "%"));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.like(root.get("title"), criteriaBuilder.literal("%" + title + "%"))));
             }
             if (race != null) {
-                predicate = criteriaBuilder.equal(root.get("race"), criteriaBuilder.literal(race));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("race"), criteriaBuilder.literal(race))));
             }
             if (profession != null) {
-                predicate = criteriaBuilder.equal(root.get("profession"), criteriaBuilder.literal(profession));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("profession"), criteriaBuilder.literal(profession))));
             }
             if (after != null) {
-                predicate =criteriaBuilder.and(criteriaBuilder.lessThanOrEqualTo(root.get("birthday"), new Date(after)));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get("birthday"), new Date(after))));
+            }
+            if (banned != null) {
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("banned"), criteriaBuilder.literal(banned))));
             }
             if (before != null) {
-                predicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get("birthday"), new Date(before)));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.lessThanOrEqualTo(root.get("birthday"), new Date(before))));
             }
-
 
             if (minExperience != null) {
-                predicate = criteriaBuilder.and(criteriaBuilder.le(root.get("experience"), minExperience));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.ge(root.get("experience"), minExperience)));
             }
             if (maxExperience != null) {
-                predicate = criteriaBuilder.and(criteriaBuilder.le(root.get("experience"), maxExperience));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.le(root.get("experience"), maxExperience)));
             }
 
             if (minLevel != null) {
-                predicate = criteriaBuilder.and(criteriaBuilder.le(root.get("level"), minLevel));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.ge(root.get("level"), minLevel)));
             }
             if (maxLevel != null) {
-                predicate = criteriaBuilder.and(criteriaBuilder.le(root.get("level"), maxLevel));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.le(root.get("level"), maxLevel)));
             }
 
-            return predicate;
+            return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
         };
 
         return playerRepository.findAll(specification,
@@ -81,42 +85,45 @@ public class PlayerServiceImpl implements PlayerService {
                                    Long after, Long before, Boolean banned, Integer minExperience,
                                    Integer maxExperience, Integer minLevel, Integer maxLevel) {
         Specification<Player> specification = (root, query, criteriaBuilder) -> {
-            Predicate predicate = null;
+            List<Predicate> predicateList = new ArrayList<>();
+
             if (name != null) {
-                predicate = criteriaBuilder.like(root.get("name"), criteriaBuilder.literal("%" + name + "%"));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.like(root.get("name"), criteriaBuilder.literal("%" + name + "%"))));
             }
             if (title != null) {
-                predicate = criteriaBuilder.like(root.get("title"), criteriaBuilder.literal("%" + title + "%"));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.like(root.get("title"), criteriaBuilder.literal("%" + title + "%"))));
             }
             if (race != null) {
-                predicate = criteriaBuilder.equal(root.get("race"), criteriaBuilder.literal(race));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("race"), criteriaBuilder.literal(race))));
             }
             if (profession != null) {
-                predicate = criteriaBuilder.equal(root.get("profession"), criteriaBuilder.literal(profession));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("profession"), criteriaBuilder.literal(profession))));
             }
-
             if (after != null) {
-                predicate = criteriaBuilder.lessThanOrEqualTo(root.get("birthday"), new Date(after));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get("birthday"), new Date(after))));
+            }
+            if (banned != null) {
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.equal(root.get("banned"), criteriaBuilder.literal(banned))));
             }
             if (before != null) {
-                predicate = criteriaBuilder.greaterThanOrEqualTo(root.get("birthday"), new Date(before));
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.lessThanOrEqualTo(root.get("birthday"), new Date(before))));
             }
 
             if (minExperience != null) {
-                predicate = criteriaBuilder.le(root.get("experience"), minExperience);
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.ge(root.get("experience"), minExperience)));
             }
             if (maxExperience != null) {
-                predicate = criteriaBuilder.le(root.get("experience"), maxExperience);
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.le(root.get("experience"), maxExperience)));
             }
 
             if (minLevel != null) {
-                predicate = criteriaBuilder.le(root.get("level"), minLevel);
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.ge(root.get("level"), minLevel)));
             }
             if (maxLevel != null) {
-                predicate = criteriaBuilder.le(root.get("level"), maxLevel);
+                predicateList.add(criteriaBuilder.and(criteriaBuilder.le(root.get("level"), maxLevel)));
             }
 
-            return predicate;
+            return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
         };
 
         return (int) playerRepository.count(specification);
@@ -183,23 +190,16 @@ public class PlayerServiceImpl implements PlayerService {
     public Player updatePlayer(Long id, Player player) {
 
         Player playerUpdate = getPlayerById(id);
-        if(player==null){
+        if (player == null) {
             return playerUpdate;
         }
-         if(player.getId()!=null&&!player.getId().equals(playerUpdate.getId())){
-             return playerUpdate;
-         }
-
-
-
-        if (player.getExperience() !=null&&player.getExperience()< 0) {
+        if (player.getExperience() != null && player.getExperience() < 0) {
             throw new BadRequest();
         }
-        if (player.getExperience() !=null&&player.getExperience() > 10000000) {
+        if (player.getExperience() != null && player.getExperience() > 10000000) {
             throw new BadRequest();
         }
-        if(player.getBirthday()!=null)
-        {
+        if (player.getBirthday() != null) {
             int time = player.getBirthday().getYear();
             if (time > 1100 || time < 100 ||
                     time < 0) {
@@ -216,13 +216,16 @@ public class PlayerServiceImpl implements PlayerService {
             playerUpdate.setProfession(player.getProfession());
         if (player.getBirthday() != null)
             playerUpdate.setBirthday(player.getBirthday());
-        if (player.getExperience() != null)
+        if (player.getExperience() != null) {
             playerUpdate.setExperience(player.getExperience());
-        if(player.getLevel()!=null){
-//            playerUpdate.setLevel(player.getLevel());
         }
-        else
-        {
+        if (player.getBanned() != null) {
+            playerUpdate.setBanned(player.getBanned());
+        }
+        if (player.getLevel() != null) {
+            playerUpdate.calculateExp();
+            player.setUntilNextLevel(player.getUntilNextLevel());
+        } else {
             playerUpdate.calculateExp();
         }
 
