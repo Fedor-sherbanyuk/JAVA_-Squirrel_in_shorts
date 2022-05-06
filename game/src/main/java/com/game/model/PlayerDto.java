@@ -1,34 +1,17 @@
-package com.game.entity;
+package com.game.model;
 
-import javax.persistence.*;
+import com.game.entity.Profession;
+import com.game.entity.Race;
+
+
 import java.util.Date;
 
-@Entity
-@Table(name = "player")
-public class Player {
- @Id
- @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false,length = 12)
-    private String name;
-    @Column(nullable = false,length = 30)
-    private String title;
-    @Enumerated(EnumType.STRING)
-    private Race race;
-    @Enumerated(EnumType.STRING)
-    private Profession profession;
+public class PlayerDto {
 
-//@Temporal(TemporalType.DATE)
-   @Column(nullable = false)
-    private Date birthday;
-    @Column
-    private Boolean banned=false;
-    @Column(nullable = false,scale = 10000000)
-    private Integer experience;
-    @Column(nullable = false)
-    private Integer level;
-    @Column(nullable = false)
-    private Integer untilNextLevel;
+    private Long id;
+
+    private String name;
+
     public Long getId() {
         return id;
     }
@@ -77,6 +60,7 @@ public class Player {
         this.birthday = birthday;
     }
 
+
     public Boolean getBanned() {
         return banned;
     }
@@ -85,6 +69,7 @@ public class Player {
 
         this.banned = banned;
     }
+
     public Integer getExperience() {
         return experience;
     }
@@ -109,13 +94,19 @@ public class Player {
         this.untilNextLevel = untilNextLevel;
     }
 
-    public Player() {
-   }
-    public void calculateExp(){
-        Integer L=(int)(Math.sqrt(2500+200*this.getExperience())-50)/100;
-        Integer N=50*(L+1)*(L+2)-this.getExperience();
-        this.setLevel(L);
-        this.setUntilNextLevel(N);
-    }
+    private String title;
 
+    private Race race;
+
+    private Profession profession;
+
+    private Date birthday;
+
+    private Boolean banned=false;
+
+    private Integer experience;
+
+    private Integer level;
+
+    private Integer untilNextLevel;
 }
